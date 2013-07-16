@@ -23,8 +23,8 @@ describe('images/ImagesBrowser', function(){
     })
   })
 
-  //Test getSomethingElse
-  describe('#getSomethingElse()', function(){
+  //Test deleteImage
+  describe('#deleteImage()', function(){
     it('should ...', function(done){
       //Test the method
       var callback = function(return_value){ 
@@ -34,24 +34,9 @@ describe('images/ImagesBrowser', function(){
       //In case of connection error calls this
       var error_callback = function(data){ 
       };
+      var image_id = 10; 
       //Call the tested method through RPC
-      methods.getSomethingElse(arg1 ,arg2 ,arg3, callback, error_callback);
-    })
-  })
-
-  //Test getImage
-  describe('#getImage()', function(){
-    it('should ...', function(done){
-      //Test the method
-      var callback = function(return_value){ 
-        //Do your checking here
-        done();
-      };
-      //In case of connection error calls this
-      var error_callback = function(data){ 
-      };
-      //Call the tested method through RPC
-      methods.getImage(image_id, callback, error_callback);
+      methods.deleteImage(image_id, callback, error_callback);
     })
   })
 

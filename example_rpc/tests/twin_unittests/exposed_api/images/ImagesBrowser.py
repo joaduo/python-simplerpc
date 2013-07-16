@@ -13,17 +13,9 @@ class ImagesBrowser(ExposedTestBase, TestCase):
   '''
   def test_getImagesList(self):
     tested_instance = self._getTestedClass()()
-    images = tested_instance.getImagesList() 
+    images = tested_instance.getImagesList()
     self.assert_(isinstance(images, dict))
-
-  def test_getImage(self):
-    tested_instance = self._getTestedClass()()
-    tested_instance.getImage('image_id01')
-
-  def test_getSomethingElse(self):
-    tested_instance = self._getTestedClass()()
-    tested_instance.getSomethingElse('image_id01', 1, 2)
 
 if __name__ == "__main__":
   unittest.main()
-  
+

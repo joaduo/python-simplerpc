@@ -101,18 +101,11 @@
       checkRequiredArgument({}, 'getImagesList( callback, error_callback)');
       pushCommand(cmd_string, args, kwargs, callback, error_callback);    
     };
-    this.getSomethingElse = function (arg1 ,arg2 ,arg3, callback, error_callback){
-      var cmd_string = 'images/ImagesBrowser.getSomethingElse'; 
-      var args = [arg1 ,arg2 ,arg3,];
-      var kwargs = {};
-      checkRequiredArgument({'arg1':arg1,'arg2':arg2,'arg3':arg3,}, 'getSomethingElse(arg1 ,arg2 ,arg3, callback, error_callback)');
-      pushCommand(cmd_string, args, kwargs, callback, error_callback);    
-    };
-    this.getImage = function (image_id, callback, error_callback){
-      var cmd_string = 'images/ImagesBrowser.getImage'; 
+    this.deleteImage = function (image_id, callback, error_callback){
+      var cmd_string = 'images/ImagesBrowser.deleteImage'; 
       var args = [image_id,];
       var kwargs = {};
-      checkRequiredArgument({'image_id':image_id,}, 'getImage(image_id, callback, error_callback)');
+      checkRequiredArgument({'image_id':image_id,}, 'deleteImage(image_id, callback, error_callback)');
       pushCommand(cmd_string, args, kwargs, callback, error_callback);    
     };
 
