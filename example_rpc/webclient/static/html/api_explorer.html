@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="no-js" lang="us">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>Simple RPC</title>
+
+  <meta name="description" content="">
+
+</head>
+
+<body>
+  <h1>Simple RPC Javascript API Explorer</h1>
+  <div>Open the Javascript console to navigate the API tree. <br/>(<b>CTRL+SHIT+I</b> on Chrome)</div>
+  <div>For importing a module in the main namespace use the "require" function, like in nodejs. (see examples below)</div>
+  <div>In the case of exposed_api, you may navigate inspecting the "exposed_api" object in the console. (pressing period and TAB to autocomplete. see examples below for usage in code)</div>
+  <h2>How to use the RPC Exposed Api</h2>
+  <pre>
+/* in your HTML, Class or Module do */
+
+//Init the context (you need one for classes in the framework)
+var context = require('context').getContext();
+
+//We require the Commands Queue in order to sync later
+var commands_queue = require('simplerpc/rpc/RPCCommandsQueue')(context);
+
+//Instance the class of ExposedRpcApi and get the root of the RPCApi namespace
+var exposed_api = require('example_rpc/ExposedRpcApi')(context).getApiRoot();
+
+//A simple callback that prints the return value
+function callbackFunction(return_value){
+  context.log.i('We have got:');
+  context.log.i(return_value);
+}
+
+//Lets call the RPC method, it goes to the queue (check the log)
+exposed_api.images.ImagesBrowser.getImagesList(callbackFunction);
+
+//Syncs the queue with server (sending all queued commands)
+commands_queue.sync();
+
+  </pre>  
+  <h2>Creating Classes and Modules and importing them</h2>
+  <div>To import a Class or module use the require function as in nodejs.</div>
+  <div>The namespace lets you directly instance the class after requiring the class, like this:</div>
+  <pre>
+    //a class that needs "context" as an construction argument.
+    var context = require('context').getContext();
+    var class_instance = require('class/path/ClassName')(context);  
+  </pre>
+  <div>You can do relative imports but only inside Class and Module definitions. It mus be code that is executed when the script is loaded by the browser.</div>
+  <h3>Classes</h3>
+  <div>To create a class use the following boiler plate. The name of the class i given from the file name. Although you can change "ClassDefinition" to whatever you want.</div>
+  <pre>
+//Define your class script as follows
+(function (){
+
+  function ClassDefinition(context){
+  
+    //to require modules with absolute paths
+    var module = require('module/path/module_name');
+    
+    //a class that needs "context" as an construction argument.
+    var class_instance = require('class/path/ClassName')(context);
+    
+    var class_instance = require('./relative/path/ClassName')(context);
+    var module = require('./relative/path/module_name');
+    
+    var private_attribute = null;
+    function privateMethod(){
+      //Do not import relative paths inside here, only in class definition!!
+    }    
+
+    this.public_attribute = null;
+    this.publicMethod = function (){
+      //Do not import relative paths inside here, only in class definition!!
+    };
+  }
+
+  if(typeof module !== 'undefined' && this.module !== module)   //Register module on Nodejs
+    module.exports = require('namespace').registerClassNamespace(__filename, ClassDefinition);
+  else // Register on browser
+    require('namespace').registerClassNamespace(null, ClassDefinition);
+
+} )();
+
+  </pre>
+  <h3>Modules</h3>
+  <div>To create a module use the following boiler plate. The name of the module is given from the file name. Although you can change "ModuleDefinition" to whatever you want.</div>
+  <pre>
+//define your module script as follows
+(function (){
+  
+  function ModuleDefinition(){
+  
+    //to require modules with absolute paths
+    var module = require('module/path/module_name');
+    
+    //a class that needs "context" as an construction argument.
+    var context = require('context').getContext();
+    var class_instance = require('class/path/ClassName')(context);
+
+    var class_instance = require('./relative/path/ClassName')(context);
+    var module = require('./relative/path/module_name');  
+
+    this.publicFunction = function (){};
+    function privateFunction(){}
+
+  }
+  
+  if(typeof module !== 'undefined' && this.module !== module)   //Register module on Nodejs
+    module.exports = require('namespace').registerModuleNamespace(__filename, ModuleDefinition);
+  else // Register on browser
+    require('namespace').registerModuleNamespace(null, ModuleDefinition);
+
+} )();
+
+  </pre>
+
+</body>
+
+<script>window.jQuery || document.write('<script src="/static/js_lib/jquery-1.8.0.min.js"><\/script>')</script>
+
+<script src="/static/js/namespace.js"></script>
+<script src="/static/js/context.js"></script>
+<script src="/static/js/simplerpc/common/Logger.js"></script>
+<script src="/static/js/simplerpc/common/ArgumentsValidation.js"></script>
+<script src="/static/js/simplerpc/common/ConnectionManager.js"></script>
+
+<script src="/static/js/simplerpc/rpc/RPCConnection.js"></script>
+<script src="/static/js/simplerpc/rpc/RPCCommandsQueue.js"></script>
+
+<script src="/static/js/example_rpc/ExposedRpcApi.js"></script>
+<script src="/static/js/api_explorer.js"></script>
+
+
+<script>
+  exposed_api = printApiExplorer('example_rpc/ExposedRpcApi');
+</script>
+
+</html>
+

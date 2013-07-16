@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html class="no-js" lang="us">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>Simple RPC</title>
+
+  <meta name="description" content="">
+
+</head>
+
+<body>
+  <h1>Simple RPC Developing Server</h1>
+  <ul>
+  <li><a href="/static/html/api_explorer.html">Api Explorer</a></li>
+<!--   <li><a href="/static/html/tests.html">Tests</a></li> -->
+<!--   <li><a href="/static/html/how_to_write_code.html">Simple RPC Developing Howto</a></li> -->
+  </ul>
+</body>
+
+<script src="/static/js/namespace.js"></script>
+<script src="/static/js/context.js"></script>
+<script src="/static/js/simplerpc/common/Logger.js"></script>
+<script src="/static/js/simplerpc/common/ArgumentsValidation.js"></script>
+<script src="/static/js/simplerpc/common/ConnectionManager.js"></script>
+
+<script src="/static/js/simplerpc/rpc/RPCConnection.js"></script>
+<script src="/static/js/simplerpc/rpc/RPCCommandsQueue.js"></script>
+
+<script src="/static/js/example_rpc/ExposedRpcApi.js"></script>
+<script src="/static/js/api_explorer.js"></script>
+
+<script>
+  printApiExplorer('example_rpc/ExposedRpcApi');
+</script>
+
+</html>
+
+
