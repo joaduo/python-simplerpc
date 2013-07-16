@@ -26,6 +26,11 @@ class context_singleton(object):
     return self.__instances
 
 class ContextBase(FrameworkObject):
+  '''
+  Provides a global configuration storage.
+  It can also have a per class configuration.
+  Check :class:`simplerpc.common.base.SelfConfigBase.SelfConfigBase`
+  '''
   def __init__(self, name):
     self.name = name
     self.__config = dict()

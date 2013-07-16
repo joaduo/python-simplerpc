@@ -16,6 +16,9 @@ class ImagesBrowser(ExposedTestBase, TestCase):
     images = tested_instance.getImagesList()
     self.assert_(isinstance(images, dict))
 
+#  def test_deleteImage(self):
+#    pass
+
 if __name__ == "__main__":
   unittest.main()
 

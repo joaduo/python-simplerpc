@@ -76,6 +76,7 @@ def run():
   import logging
   printSmoke.do_print = False
   Logger.default_level = logging.ERROR
+  Logger.handler_level = logging.ERROR
   context = SimpleRpcContext('smoke test')
   s = SmokeTestRunner(context)
   s.runTests()

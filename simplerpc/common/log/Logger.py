@@ -9,7 +9,8 @@ For details check the LICENSE file in the root of the project.
 import logging
 
 class Logger(object):
-  default_level = logging.DEBUG
+  default_level = logging.INFO
+  handler_level = logging.DEBUG
   def __init__(self, name, output=None, level=None):
     if not level:
       level = self.default_level
@@ -22,7 +23,7 @@ class Logger(object):
     self.setLevel(level)
   def __configLogging(self, name, level):
     hdlr = logging.StreamHandler()
-    hdlr.setLevel(level)
+    hdlr.setLevel(self.handler_level)
     fmt = logging.Formatter(logging.BASIC_FORMAT, None)
     hdlr.setFormatter(fmt)
     logging.root.addHandler(hdlr)

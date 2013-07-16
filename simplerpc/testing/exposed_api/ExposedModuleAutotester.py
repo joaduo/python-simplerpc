@@ -10,7 +10,7 @@ from simplerpc.context.SimpleRpcContext import SimpleRpcContext
 from simplerpc.common.FileManager import FileManager
 from simplerpc.expose_api.javascript.ClassToJsUnitTest import ClassToJsUnitTest
 import os
-from simplerpc.expose_api.javascript.NodeJsRunner import NodeJsRunner
+import logging
 
 class ExposedModuleAutotester(SimpleRpcLogicBase):
   '''
@@ -19,6 +19,7 @@ class ExposedModuleAutotester(SimpleRpcLogicBase):
   def __init__(self, context=None):
     if context == None:
       context = SimpleRpcContext(self.__class__.__name__)
+      context.log.setLevel(logging.DEBUG)
     SimpleRpcLogicBase.__init__(self, context)
 
   def __post_init__(self):
@@ -26,27 +27,10 @@ class ExposedModuleAutotester(SimpleRpcLogicBase):
     self.module_unit_test_runner = ModuleUnitTestRunner(self.context)
     self.file_manager = FileManager(self.context)
     self.class_to_js_unittest = ClassToJsUnitTest(self.context)
-    self.nodejs = NodeJsRunner(self.context)
-
-  def _runPythonTest(self, tested_class):
-    tester_class = self.twins_manager.getTesterFromTested(tested_class)
-    path = self.file_manager.formatClassFilePath(tester_class)
-    name = tester_class.__name__
-    self.log.d('Running %r test at:\n %s' % (name, path))
-    self.module_unit_test_runner.runSingleTest(tester_class, tested_class)
 
   def autoTest(self):
     tested_class = self.__getTestedClass()
-    self._runPythonTest(tested_class)
-    self._runJsTest(tested_class)
-
-  def _runJsTest(self, tested_class):
-    file_path = self.twins_manager.getJsUnittest(tested_class)
-    path = self.file_manager.formatFilePath(file_path)
-    self.log.d('Running jasmine test at:\n%s' % path)
-    ret_val = self.nodejs.runJasmineTest(file_path)
-    if not ret_val:
-      self.log.d('jasmine test OK.')
+    self.module_unit_test_runner.runPythonTest(tested_class)
 
   def createJsUnitTest(self, overwrite=False):
     tested_class = self.__getTestedClass()

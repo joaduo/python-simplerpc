@@ -23,5 +23,4 @@ describe('images/ImagesBrowser', function(){
     })
   })
 
-
 })

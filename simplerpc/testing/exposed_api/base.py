@@ -8,6 +8,7 @@ from simplerpc.testing.exposed_api.TwinModulesManager import TwinModulesManager
 from simplerpc.context.SimpleRpcContext import SimpleRpcContext
 from simplerpc.base.SimpleRpcLogicBase import SimpleRpcLogicBase
 from simplerpc.common.FileManager import FileManager
+from simplerpc.testing.exposed_api.ModuleUnitTestRunner import ModuleUnitTestRunner
 
 class ExposedTestBase(SimpleRpcLogicBase):
   tests_context = None
@@ -37,6 +38,10 @@ class ExposedTestBase(SimpleRpcLogicBase):
         self.__runs_from_tested_module = True
       context = ExposedTestBase.tests_context
     SimpleRpcLogicBase.__init__(self, context)
+
+  def __post_init__(self):
+    self.twins_manager = TwinModulesManager(self.context)
+    self.module_unit_test_runner = ModuleUnitTestRunner(self.context)
     self.file_manager = FileManager(self.context)
 
   def runTest(self):
@@ -47,6 +52,10 @@ class ExposedTestBase(SimpleRpcLogicBase):
     name = tested_class.__name__
     self.log.d('Testing %r at:\n %s' % (name, path))
     
+  def testJsJasmine(self):
+    tested_class = self._getTestedClass()
+    self.module_unit_test_runner.runJsTest(tested_class)
+
   def testMethodsExistence(self):
     tested_class = self._getTestedClass()
     if not self.__runs_from_tested_module:
@@ -55,11 +64,12 @@ class ExposedTestBase(SimpleRpcLogicBase):
     for name, attrib in tested_class.__dict__.items():
       if callable(attrib) and not name.startswith('_'):
         test_name = 'test_%s' % name
-        assert test_name in self.__class__.__dict__, 'There is no test in %r for method %r in class %r' % (self.__class__, name, tested_class)
+        msg = 'There is no test test_%s for class %r' % (name, tested_class)
+        assert test_name in self.__class__.__dict__, msg
         #assert callable(self.__class__.__dict__[test_name]) #TODO: necessary?
 
   def _getTestedClass(self):
-    return TwinModulesManager(self.context).getTestedFromTester(self.__class__)
+    return self.twins_manager.getTestedFromTester(self.__class__)
 
 def smokeTestModule():
   context = SimpleRpcContext('smoke test')
