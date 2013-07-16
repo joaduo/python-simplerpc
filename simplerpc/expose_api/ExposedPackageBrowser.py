@@ -6,7 +6,7 @@ Copyright (c) 2013, Joaquin G. Duo
 from simplerpc.base.SimpleRpcLogicBase import SimpleRpcLogicBase
 from inspect import isclass
 from simplerpc.expose_api.base.ExposedBase import ExposedBase
-from simplerpc.PackageClassesInspector import ModulesAttributesIterator
+from simplerpc.common.PackageClassesInspector import ModulesAttributesIterator
 
 class ExposedPackageBrowser(SimpleRpcLogicBase):
   '''

@@ -4,7 +4,7 @@ Simple RPC
 Copyright (c) 2013, Joaquin G. Duo
 '''
 from simplerpc.base.SimpleRpcLogicBase import SimpleRpcLogicBase
-from simplerpc.PackageClassesInspector import ModulesAttributesIterator
+from simplerpc.common.PackageClassesInspector import ModulesAttributesIterator
 from unittest.loader import TestLoader
 from unittest.case import TestCase
 from unittest.runner import TextTestRunner
