@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 '''
 Simple RPC
+Copyright (c) 2013, Joaquin G. Duo
 Copyright (c) 2012-2013, LastSeal S.A.
 '''
 

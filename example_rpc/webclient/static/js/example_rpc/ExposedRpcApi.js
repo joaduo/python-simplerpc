@@ -101,13 +101,6 @@
       checkRequiredArgument({}, 'getImagesList( callback, error_callback)');
       pushCommand(cmd_string, args, kwargs, callback, error_callback);    
     };
-    this.deleteImage = function (image_id, callback, error_callback){
-      var cmd_string = 'images/ImagesBrowser.deleteImage'; 
-      var args = [image_id,];
-      var kwargs = {};
-      checkRequiredArgument({'image_id':image_id,}, 'deleteImage(image_id, callback, error_callback)');
-      pushCommand(cmd_string, args, kwargs, callback, error_callback);    
-    };
 
   }
   

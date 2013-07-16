@@ -1,17 +1,14 @@
 '''
-Created on Mar 18, 2012
-
-@author: jduo
+Simple RPC
+Copyright (c) 2011-2013, Joaquin G. Duo
+Copyright (c) 2012-2013, LastSeal S.A.
 '''
 
 import sys
 import inspect
 
-mayor_version = sys.version[0]
-
 def on_python_3():
-  return mayor_version == '3'
-
+  return sys.version_info.major == '3'
 
 def portable_getargspec(func):
   '''

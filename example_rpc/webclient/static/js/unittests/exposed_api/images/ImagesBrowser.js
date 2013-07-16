@@ -23,21 +23,5 @@ describe('images/ImagesBrowser', function(){
     })
   })
 
-  //Test deleteImage
-  describe('#deleteImage()', function(){
-    it('should ...', function(done){
-      //Test the method
-      var callback = function(return_value){ 
-        //Do your checking here
-        done();
-      };
-      //In case of connection error calls this
-      var error_callback = function(data){ 
-      };
-      var image_id = 10; 
-      //Call the tested method through RPC
-      methods.deleteImage(image_id, callback, error_callback);
-    })
-  })
 
 })
