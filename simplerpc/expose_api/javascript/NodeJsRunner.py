@@ -35,8 +35,16 @@ class NodeJsRunner(SimpleRpcLogicBase):
   def runJasmineTest(self, file_path):
     argv = [self.context.jasmine_node_command, file_path, '--matchall',
             '--captureExceptions', '--noColor']
-    return self.__printJasmineErrors(file_path, *self.runNodeJs(argv, pipe=True))
+    return self.__printJasmineErrors(file_path, *self.__runProcess(argv,
+                                                                   pipe=True))
 
+  def __runProcess(self, argv, pipe):
+    if pipe:
+      p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      return p.wait(), p.stdout.read(), p.stderr.read()
+    else:
+      p = subprocess.Popen(argv)
+      return p.wait()
 
   def runNodeJs(self, argv=None, pipe=False):
     self.setNodePath()
@@ -44,12 +52,7 @@ class NodeJsRunner(SimpleRpcLogicBase):
     if not argv:
       argv = sys.argv[1:]
     argv = [self.context.node_command] + argv
-    if pipe:
-      p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      return p.wait(), p.stdout.read(), p.stderr.read()
-    else:
-      p = subprocess.Popen(argv)
-      return p.wait()
+    return self.__runProcess(argv, pipe)
 
 def smokeTestModule():
   from simplerpc.context.SimpleRpcContext import SimpleRpcContext
