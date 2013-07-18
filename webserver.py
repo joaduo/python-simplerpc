@@ -15,6 +15,7 @@ from tornado.options import define, options
 from example_rpc.tornado_handler.RPCRequestHandler import RPCRequestHandler
 from simplerpc.context.SimpleRpcContext import SimpleRpcContext
 from simplerpc.expose_api.javascript.RPCJavascriptGenerator import RPCJavascriptGenerator
+from example_rpc.tornado_handler.JsonRpcHandler import JsonRpcHandler
 
 #import logging
 #logging.disable(logging.INFO)
@@ -26,8 +27,8 @@ class Application(tornado.web.Application):
   def __init__(self):
     handlers = [
       (r"/", MainHandler),
-      (r"/public_readonly/.*", RPCRequestHandler),
-      (r"/commands_queue/.*", RPCRequestHandler),
+      (r"/public_readonly/.*", JsonRpcHandler),
+      (r"/commands_queue/.*", JsonRpcHandler),
     ]
     settings = dict(
       template_path=os.path.join(self.getWebClientRoot(), "templates"),
