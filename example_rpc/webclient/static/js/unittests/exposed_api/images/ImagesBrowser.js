@@ -17,7 +17,6 @@ describe('images/ImagesBrowser', function(){
       };
       //In case of connection error calls this
       var error_callback = function(data){ 
-        context.log.d(data);
       };
       //Call the tested method through RPC
       methods.getImagesList( callback, error_callback);

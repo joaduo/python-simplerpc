@@ -53,7 +53,7 @@ def smokeTestModule():
     return ImagesBrowser
   ema._ExposedModuleAutotester__getTestedClass = getTestedClass
   ema.autoTest()
-  ema.createJsUnitTest(overwrite=True)
+  ema.createJsUnitTest(overwrite=False)
 
 if __name__ == "__main__":
   smokeTestModule()
