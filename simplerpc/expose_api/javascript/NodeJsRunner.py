@@ -39,6 +39,9 @@ class NodeJsRunner(SimpleRpcLogicBase):
                                                                    pipe=True))
 
   def __runProcess(self, argv, pipe):
+    #we need to know where the .js are
+    self.setNodePath()
+    #run the process!
     if pipe:
       p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       return p.wait(), p.stdout.read(), p.stderr.read()
@@ -47,7 +50,6 @@ class NodeJsRunner(SimpleRpcLogicBase):
       return p.wait()
 
   def runNodeJs(self, argv=None, pipe=False):
-    self.setNodePath()
     #node_command = 'node'
     if not argv:
       argv = sys.argv[1:]
