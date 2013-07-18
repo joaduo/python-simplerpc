@@ -16,6 +16,8 @@ class JsonRpcHandler(tornado.web.RequestHandler):
   Javascript API.
   self.dispatcher is responsible of creating a dispatching dict and doing the
   distpatch.
+  This handler implements a partial Json-Rpc 2.0 since its not splitting json
+  but rather using a json list (given withing a json object)
   '''
   def __init__(self, *args, **kwargs):
     tornado.web.RequestHandler.__init__(self, *args, **kwargs)
@@ -43,23 +45,25 @@ class JsonRpcHandler(tornado.web.RequestHandler):
   def get(self):
     '''
     Serve all GET requests and dispatch them to their corresponding class.
+    This is not Json-rpc GET, since the request parameter are not in a GET
+    'params' parameter, but in the global ones.
     '''
     uri_split = self.request.uri.split('?')[0].split('/')
     method_type = uri_split[1]
     cmd = '.'.join(uri_split[2:])
     if method_type == 'public_readonly':
       kwargs = self._delistArguments(self.request.arguments)
-      return_value = self.dispatcher.answer(public_readonly, cmd=cmd, args=[],
+      result = self.dispatcher.answer(public_readonly, cmd=cmd, args=[],
                                             kwargs=kwargs)
     elif method_type == 'public_get':
       kwargs = self._delistArguments(self.request.arguments)
-      return_value = self.dispatcher.answer(public_get, cmd=cmd, args=[],
+      result = self.dispatcher.answer(public_get, cmd=cmd, args=[],
                                             kwargs=kwargs)
     #TODO: 'private_get':
     else:
       raise SimpleRpcError('Unknown method_type %r...' % method_type[:10])
 
-    self.write(dict(return_value=return_value))
+    self.write(dict(result=result))
     self.finish()
 
   def post(self):
@@ -68,38 +72,38 @@ class JsonRpcHandler(tornado.web.RequestHandler):
     '''
     uri_split = self.request.uri.split('?')[0].split('/')
     method_type = uri_split[1]
-    if method_type == 'commands_queue':
-      cmds = json.loads(self.get_argument('cmds'))
-      results = self._execCommandsQueue(cmds)
-      self.write(dict(results=results))
+    if method_type == 'requests_queue':
+      requests = json.loads(self.get_argument('requests'))
+      answers = self._execCommandsQueue(requests)
+      self.write(dict(answers=answers))
     #TODO: elif method_type == 'public_post': #TODO: 'private_post':
     else:
       raise SimpleRpcError('Unknown method_type %r...' % method_type[:10])
 
     self.finish()
 
-  def _execCommandsQueue(self, cmds):
+  def _execCommandsQueue(self, requests):
     '''
     If a command queue comes, we need to answer each command trapping
     exceptions and reporting errors for each command.
-    :param cmds:list of commands sent by the client.
+    :param requests:list of commands sent by the client.
     '''
-    results = []
+    answers = []
     args_index, kwargs_index = 0, 1
     answer = self.dispatcher.answer
-    for cmd in cmds:
-      rpc_answer = dict()
-      rpc_answer['id'] = cmd['id']
+    for req in requests:
+      rpc_answer = dict(jsonrpc='2.0')
+      rpc_answer['id'] = req['id']
       try:
-        return_value = answer(public_post, cmd['method'],
-                              cmd['params'][args_index],
-                              cmd['params'][kwargs_index])
+        return_value = answer(public_post, req['method'],
+                              req['params'][args_index],
+                              req['params'][kwargs_index])
         rpc_answer['result'] = return_value
       except Exception as error:
         raise error
         rpc_answer['error'] = dict(code=0, msg=str(error))
-      results.append(rpc_answer)
-    return results
+      answers.append(rpc_answer)
+    return answers
 
 def smokeTestModule():
   pass

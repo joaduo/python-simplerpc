@@ -12,88 +12,108 @@
     var RPCConnection = require('./RPCConnection')(context);
 
     function RPCCommandsQueue(){
-      var commands_queue = [];
-      var callbacks_queue = [];
-      var error_callbacks = [];
+      var requests_queue = {};
+      var id_count = 0;
 
       this.push = function(cmd_string, args, kwargs, callback, error_callback){
-        //var cmd = [cmd_string,args,kwargs];
-        var cmd = {
+        //Create json-rpc request
+        var request = {
               jsonrpc:'2.0',
               method:cmd_string,
               params:[args,kwargs],
-              id:commands_queue.length,
+              id:id_count,
             };
-        context.log.d('Pushing command: "'+cmd+'"');
-        commands_queue.push(cmd);
-        callbacks_queue.push(callback);
-        error_callbacks.push(error_callback);
+        context.log.d('Pushing request: "'+request+'"');
+        //Add it to the commands queue
+        var request_data = {
+            callback:callback,
+            error_callback:error_callback,
+            request:request,
+        };
+        //finally add it
+        requests_queue[id_count] = request_data;
+        id_count += 1;
       };
 
       this.pop = function(){
-        context.log.d('Popping cmd: '+ commands_queue.pop());
-        callbacks_queue.pop();
-        error_callbacks.pop();
+        var id_pop = id_count -1;
+        var request_data = requests_queue[id_pop];
+        delete requests_queue[id_pop];
+        context.log.d('Popping request: '+ request_data.request);
       };
-
-      function emptyArray(array){
-        array.splice(0,array.length);
+      
+      function processRequestAnswer(request_data, answer){
+        //extract request for smaller code
+        var request = request_data.request;
+        if(!answer.error){
+          //call associated callback
+          var callback = request_data.callback;
+          if(callback){
+            context.log.d('Calling request "'+ request +
+                          '" callback: "' + 
+                          RPCConnection.formatForLog(callback));
+            callback(answer.result);
+          }
+          else{
+            context.log.d('No callback for request "'+ request +
+                          '" with id: '+ request.id);
+          }
+        }
+        else{
+          //There was an error, call the error_callback with data sent in 
+          //the error (may be a message or something else)
+          //call associated error_callback
+          var error_callback = request_data.error_callback;
+          if(error_callback){
+            context.log.d('Calling request error_callback: ' + 
+                RPCConnection.formatForLog(error_callback) + 
+                'for command "'+ +'" ');
+            context.log.d('Result was: "'+answer.result+'"');
+            error_callback(answer.error);
+          }
+          else{
+            context.log.d('No error_callback associated for request "'+
+                request+ '". Result Error: "'+ answer.error +'"');
+          }
+        }        
+      }
+      
+      function checkMissinAnswers(answers_ids){
+        var missing_answers = [];
+        //Iterate over queue request to check if one has no aswer
+        for(var request_id in requests_queue){
+          if(!request_id in answers_ids){
+            missing_answers.push(request_id);
+          }
+        }
+        //Report the problem
+        if(missing_answers.length > 0){
+          msg = 'There where '+missing_answers.length +'missing answers'
+          context.log.e(msg)
+          throw new Error(msg);
+        }
       }
       
       function syncCallback(data){
-        var commands_results = data['results'];
-        //Check if length match (same amount of commands sent and received)
-        if (!commands_results.length == commands_queue.length){ 
-          //Real error, answer should be of same length
-          context.log.d('Receiving different amount of results ('+ 
-                        commands_results.length +') for sent commands ('+ 
-                        commands_queue.length +')');  
-        }
-        else if(commands_queue.length == 0){
-          var msg = 'There were no commands. Then there sholdn\'t be any RPC.'
-          throw new Error(msg);
-        }
-        else{
-          for ( var index = 0; index < commands_results.length; index++) {
-            //extract result and associated callbacks from arrays
-            var cmd_result = commands_results[index];
-            var callback = callbacks_queue[index];
-            var error_callback = error_callbacks[index];
-            //if there was no error for the command
-            if(typeof cmd_result.error == 'undefined'){
-              //call associated callback
-              if(typeof callback !== 'undefined'){
-                context.log.d('Calling command "'+ commands_queue[index][0] +
-                              '" at index '+ index+' command callback "' + 
-                              RPCConnection.formatForLog(callback));
-                //callback(cmd_result['return_value']);
-                callback(cmd_result.result);
-              }
-              else{
-                context.log.d('No callback for command "'+
-                              commands_queue[index][0] +'" at index: '+ index);
-              }
-            }
-            else{ 
-              //There was an error, call the error_callback with data sent in 
-              //the error (may be a message or something else)
-              //call associated error_callback
-              if(typeof error_callback !== 'undefined'){
-                context.log.d('Calling command error_callback ' + 
-                    RPCConnection.formatForLog(error_callback) + 'for command "'+
-                    commands_queue[index][0] +'" id '+ index );
-                context.log.d(cmd_result);
-                error_callback(cmd_result.error);
-              }
-              else{
-                context.log.d('Error for RPC Command"'+ 
-                    commands_queue[index][0] +'" number '+ index +
-                    ' in the batch. No error_callback associated. Result Error: "'+ 
-                    cmd_result.error +'"');
-              }
-            }
+        var answers = data.answers;
+        var answers_ids = [];
+        //Iterate over answers and match them with their ids
+        for(var index in answers){
+          var answer = answers[index];
+          if(answer.id in requests_queue){
+            //get request data to extract callback and error_callback 
+            var request_data = requests_queue[answer.id];
+            processRequestAnswer(request_data, answer);
           }
+          else{
+            var msg = 'Unexpected answer:'+answer
+            context.log.e(msg);
+            throw new Error(msg);
+          }
+          answers_ids.push(answer.id);
         }
+        //Report about requests without answers
+        checkMissinAnswers(answers_ids);
       }
       
       function errorCallback(error){
@@ -102,12 +122,16 @@
       }
 
       this.sync = function(){
-        if(commands_queue.length == 0){
+        if(requests_queue.length == 0){
           context.log.d('No commands in queue. Nothing to do.');
         }
         //Send the ajax request through POST
-        var post_args = {'cmds':JSON.stringify(commands_queue)};
-        RPCConnection.asyncGameServerRPC('/commands_queue/', '', post_args, 
+        var requests = [];
+        for(var rid in requests_queue){
+          requests.push(requests_queue[rid].request);
+        }
+        var post_args = {'requests':JSON.stringify(requests)};
+        RPCConnection.asyncGameServerRPC('/requests_queue/', '', post_args, 
                                          syncCallback, errorCallback );
       };  
 

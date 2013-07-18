@@ -28,7 +28,7 @@ class Application(tornado.web.Application):
     handlers = [
       (r"/", MainHandler),
       (r"/public_readonly/.*", JsonRpcHandler),
-      (r"/commands_queue/.*", JsonRpcHandler),
+      (r"/requests_queue/.*", JsonRpcHandler),
     ]
     settings = dict(
       template_path=os.path.join(self.getWebClientRoot(), "templates"),
