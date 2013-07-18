@@ -12,7 +12,13 @@
     var ConnectionManager = require('simplerpc/common/ConnectionManager')(context);
     
     function getUrlBase(){
-      return {server:'localhost', port:8002}; //document.urlBase;
+      if(typeof module !== 'undefined' && this.module !== module){
+        //On nodejs
+        return {server:'localhost', port:8002}; //document.urlBase;
+      }
+      else{
+        return {server:location.hostname, port:location.port};
+      }
     }
 
     function getPublicServerUrlBase(){
