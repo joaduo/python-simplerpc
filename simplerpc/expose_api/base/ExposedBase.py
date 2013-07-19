@@ -9,12 +9,27 @@ from simplerpc.base.SimpleRpcObject import SimpleRpcObject
 
 class ExposedBase(SimpleRpcObject):
   '''
-  #TODO: document
-  Introspect to expose the public methods through RPC API
-  Introspect to generate the API in javascript to call the RPC API
+  Inherit from this class if you want to automatically expose decorated method.
+  Available decorators are in simple_rpc.expose_api.decorators.
+
+  Classes are exposed in the same namespace they have in python.
+  For example:
+    example_rpc.exposed_api.images.ImagesBrowser.getImagesList
+  will end in:
+    exposed_api.images.ImagesBrowser.getImagesList
+
+  Where 'exposed_api' comes from:
+    var context = require('context').getContext();
+    var exposed_api = require('example_rpc/ExposedRpcApi')(context).getApiRoot();
+    //you use it
+    exposed_api.images.ImagesBrowser.getImagesList(...);
+
+  You can also access to exposed API in javascript in a more nodejs way:
+    ImagesBrowser = require('example_rpc/ExposedRpcApi')(context
+                    ).requireApi('images/ImagesBrowser');
+
   '''
   def __init__(self):
-    ''' #TODO: document '''
     self.decorators = getDecoratorsDict()
 
   def exposedMethods(self, method_type):

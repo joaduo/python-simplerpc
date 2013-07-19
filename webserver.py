@@ -12,7 +12,6 @@ import tornado.options
 import tornado.web
 import os.path
 from tornado.options import define, options
-from example_rpc.tornado_handler.RPCRequestHandler import RPCRequestHandler
 from simplerpc.context.SimpleRpcContext import SimpleRpcContext
 from simplerpc.expose_api.javascript.RPCJavascriptGenerator import RPCJavascriptGenerator
 from example_rpc.tornado_handler.JsonRpcHandler import JsonRpcHandler

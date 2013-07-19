@@ -8,6 +8,11 @@ from types import MethodType
 class rpc_decorator_base(object):
   def __init__(self, method):
     self.method = method
+  def __wrapped__(self):
+    if isinstance(self.method, rpc_decorator_base):
+      return self.method.__wrapped__()
+    else:
+      return self.method
   def __call__(self, *args, **kwargs):
     return self.method(*args, **kwargs)
   def __get__(self, obj, objtype=None):
