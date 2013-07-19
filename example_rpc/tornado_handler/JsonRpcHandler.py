@@ -14,10 +14,10 @@ class JsonRpcHandler(tornado.web.RequestHandler):
   '''
   This is the main handler for Dispatching commands from the auto-generated
   Javascript API.
-  self.dispatcher is responsible of creating a dispatching dict and doing the
-  distpatch.
+  Attribute self.dispatcher is responsible of creating a dispatching dict
+    and doing the distpatch.
   This handler implements a partial Json-Rpc 2.0 since its not splitting json
-  but rather using a json list (given withing a json object)
+    but rather using a json list (given within a json object).
   '''
   def __init__(self, *args, **kwargs):
     tornado.web.RequestHandler.__init__(self, *args, **kwargs)
