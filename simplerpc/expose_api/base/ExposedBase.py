@@ -3,14 +3,17 @@
 Simple RPC
 Copyright (c) 2012-2013, LastSeal S.A.
 '''
-from simplerpc.SimpleRpcError import SimpleRpcError
-from simplerpc.expose_api.decorators import getDecoratorsDict, rpc_decorator_base
 from simplerpc.base.SimpleRpcObject import SimpleRpcObject
 
 class ExposedBase(SimpleRpcObject):
   '''
   Inherit from this class if you want to automatically expose decorated method.
   Available decorators are in simple_rpc.expose_api.decorators.
+  To be exposed methods must:
+    - be public -> not starting with "_" (underscore)
+    - belonging to the Leaf class (methods of parent classes wont be published)
+  If you would like to override this policies inherit from this class and
+  re-implement the "_getMethodFilterFunc" or "exposedMethods"  method.
 
   Classes are exposed in the same namespace they have in python.
   For example:
@@ -29,37 +32,46 @@ class ExposedBase(SimpleRpcObject):
                     ).requireApi('images/ImagesBrowser');
 
   '''
-  def __init__(self):
-    self.decorators = getDecoratorsDict()
+  def exposedMethods(self, decorator_class):
+    '''
+    Returns a list of names of the decorated methods for this class
+    :param decorator_class: decorator_class class inspected
+    '''
+    filter_func = self._getMethodFilterFunc(decorator_class)
+    return self._exposedMethods(filter_func)
 
-  def exposedMethods(self, method_type):
-    return self._exposedMethods(method_type, filter_func=None)
+  def _getMethodFilterFunc(self, decorator_class):
+    return lambda name, decorator: isinstance(decorator, decorator_class)
 
-  def _exposedMethods(self, method_type, filter_func):
-    ''' Will only expose methods of the child class to avoid security risks.
+  def _exposedMethods(self, filter_func):
+    ''' Will only expose methods of the leaf classes to avoid security risks.
         By default not decorated methods will be taken as
     '''
-    if not method_type in self.decorators:
-      raise SimpleRpcError('There is no method type %r. Availables: %s' % (method_type, self.decorators.keys()))
-    decorator_class = self.decorators[method_type]
-    attributes = self.__class__.__dict__
+    names = self.__class__.__dict__.keys()
     exposed_methods = []
-    for name, value in attributes.items():
-      if isinstance(value, decorator_class):
-        exposed_methods.append(name)
-      elif not isinstance(value, rpc_decorator_base) and filter_func and filter_func(name):
+    for name in names:
+      method = getattr(self, name)
+      if filter_func(name, method):
         exposed_methods.append(name)
     return exposed_methods
 
 def smokeTestModule():
   from simplerpc.common.log.printSmoke import printSmoke
-  from simplerpc.expose_api.decorators import public_post
+  from simplerpc.expose_api.decorators import expose
   class TestExpose(ExposedBase):
-    @public_post
+    @expose
     def test(self):
       return 1
+    @expose.safe
+    def get(self):
+      pass
+    @expose.idempotent
+    def delete(self):
+      pass
   te = TestExpose()
-  printSmoke(te.exposedMethods('public_post'))
+  printSmoke(te.exposedMethods(expose))
+  printSmoke(te.exposedMethods(expose.idempotent))
+  printSmoke(te.exposedMethods(expose.safe))
 
 if __name__ == "__main__":
   smokeTestModule()

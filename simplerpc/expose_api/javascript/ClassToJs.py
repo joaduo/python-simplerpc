@@ -8,7 +8,7 @@ from simplerpc.expose_api.javascript.base import JsTranslatorBase
 from simplerpc.base.SimpleRpcLogicBase import SimpleRpcLogicBase
 from simplerpc.expose_api.javascript.data_model import TranslationAstNode, \
   AutoTemplateAstNode
-from simplerpc.expose_api.decorators import getDecoratorsDict
+from simplerpc.expose_api.decorators import getDecoratorsList
 from simplerpc.context.SimpleRpcContext import SimpleRpcContext
 
 class ClassToJs(JsTranslatorBase):
@@ -21,14 +21,11 @@ class ClassToJs(JsTranslatorBase):
     class_node = TranslationAstNode('classes.ExposedClass')
     class_node.translate(CLASS_NAME=class_.__name__,
                          NAMESPACE='/'.join(class_namespace.split('.')))
-    #TODO: clean this
-    decorators = [name for name in getDecoratorsDict().keys()
-                  if not name.startswith('private')]
     methods_node = AutoTemplateAstNode()
-    for method_type in decorators:
-      m = self._getMethodTypeNode(class_, class_namespace, method_type)
-      if m:
-        methods_node.translate(method_type, m)
+    for decorator_class in getDecoratorsList():
+      node = self._getMethodTypeNode(class_, class_namespace, decorator_class)
+      if node:
+        methods_node.translate(decorator_class.__name__, node)
     class_node.translate(METHODS=methods_node)
     return class_node
 
@@ -50,13 +47,13 @@ class ClassToJs(JsTranslatorBase):
     else:
       return class_()
 
-  def _getMethodTypeNode(self, class_, class_namespace, method_type):
+  def _getMethodTypeNode(self, class_, class_namespace, decorator_class):
     methods_node = AutoTemplateAstNode()
     instance = self._getClassInstance(class_)
-    exposed_methods = instance.exposedMethods(method_type)
+    exposed_methods = instance.exposedMethods(decorator_class)
     if len(exposed_methods):
       for method_name in exposed_methods:
-        mt_node = TranslationAstNode('methods.%s' % method_type)
+        mt_node = TranslationAstNode('methods.%s' % decorator_class.__name__)
         method = getattr(instance, method_name)
         if hasattr(method, 'method'): #TODO should look for getDecoratedMethod
           method = method.method

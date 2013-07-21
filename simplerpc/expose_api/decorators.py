@@ -5,57 +5,36 @@ Copyright (c) 2012-2013, LastSeal S.A.
 '''
 from types import MethodType
 
-class rpc_decorator_base(object):
-  def __init__(self, method):
-    self.method = method
-  def __wrapped__(self):
-    if isinstance(self.method, rpc_decorator_base):
-      return self.method.__wrapped__()
-    else:
-      return self.method
-  def __call__(self, *args, **kwargs):
-    return self.method(*args, **kwargs)
-  def __get__(self, obj, objtype=None):
-    return MethodType(self, obj, objtype)  
-
-class public_readonly(rpc_decorator_base):
+class decorator_base(object):
   pass
 
-class public_get(rpc_decorator_base):
-  pass
+def getClass(name):
+  class ExposedDecorator(decorator_base):
+    def __init__(self, method):
+      self.method = method
+    def __call__(self, *args, **kwargs):
+      return self.method(*args, **kwargs)
+    def __get__(self, obj, objtype=None):
+      return MethodType(self, obj, objtype)
+  return ExposedDecorator
 
-class public_post(rpc_decorator_base):
-  pass
+class expose(getClass('expose')):
+  safe = getClass('safe')
+  idempotent = getClass('idempotent')
 
-class private_readonly(rpc_decorator_base):
-  pass
-
-class private_get(rpc_decorator_base):
-  pass
-
-class private_post(rpc_decorator_base):
-  pass
-
-#TODO: automate below?
 def getDecoratorsList():
-  return [ public_readonly, 
-           public_get, 
-           public_post,
-           private_readonly,
-           private_get,
-           private_post ]
-
-def getDecoratorsDict():
-  decorators = getDecoratorsList()
-  decorators_dict = {}
-  for dec in decorators:
-    decorators_dict[dec.__name__] = dec
-  return decorators_dict
-
+  return [expose, expose.safe, expose.idempotent]
 
 def smokeTestModule():
-  getDecoratorsDict()
-  getDecoratorsList()
+  @expose
+  def function():
+    pass
+  @expose.safe
+  def function2():
+    pass
+  @expose.idempotent
+  def function3():
+    pass
 
 if __name__ == "__main__":
   smokeTestModule()

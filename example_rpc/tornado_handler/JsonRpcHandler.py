@@ -4,7 +4,7 @@ Simple RPC
 Copyright (c) 2012-2013, LastSeal S.A.
 '''
 from simplerpc.expose_api.RPCDispatcher import RPCDispatcher
-from simplerpc.expose_api.decorators import public_readonly, public_get, public_post
+from simplerpc.expose_api.decorators import expose
 from simplerpc.SimpleRpcError import SimpleRpcError
 import tornado.web
 import json
@@ -51,15 +51,10 @@ class JsonRpcHandler(tornado.web.RequestHandler):
     uri_split = self.request.uri.split('?')[0].split('/')
     method_type = uri_split[1]
     cmd = '.'.join(uri_split[2:])
-    if method_type == 'public_readonly':
+    if method_type == 'get':
       kwargs = self._delistArguments(self.request.arguments)
-      result = self.dispatcher.answer(public_readonly, cmd=cmd, args=[],
+      result = self.dispatcher.answer(expose.safe, cmd=cmd, args=[],
                                             kwargs=kwargs)
-    elif method_type == 'public_get':
-      kwargs = self._delistArguments(self.request.arguments)
-      result = self.dispatcher.answer(public_get, cmd=cmd, args=[],
-                                            kwargs=kwargs)
-    #TODO: 'private_get':
     else:
       raise SimpleRpcError('Unknown method_type %r...' % method_type[:10])
 
@@ -95,7 +90,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
       rpc_answer = dict(jsonrpc='2.0')
       rpc_answer['id'] = req['id']
       try:
-        return_value = answer(public_post, req['method'],
+        return_value = answer(expose, req['method'],
                               req['params'][args_index],
                               req['params'][kwargs_index])
         rpc_answer['result'] = return_value

@@ -26,7 +26,7 @@ class Application(tornado.web.Application):
   def __init__(self):
     handlers = [
       (r"/", MainHandler),
-      (r"/public_readonly/.*", JsonRpcHandler),
+      (r"/get/.*", JsonRpcHandler),
       (r"/requests_queue/.*", JsonRpcHandler),
     ]
     settings = dict(

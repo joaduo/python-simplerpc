@@ -4,7 +4,6 @@ Simple RPC
 Copyright (c) 2012-2013, LastSeal S.A.
 '''
 from simplerpc.common.abstract.decorators.context_singleton import context_singleton
-from simplerpc.expose_api.decorators import getDecoratorsDict
 from simplerpc.base.SimpleRpcLogicBase import SimpleRpcLogicBase
 from simplerpc.RpcNotFoundError import RpcNotFoundError
 from simplerpc.context.SimpleRpcContext import SimpleRpcContext
@@ -13,6 +12,7 @@ from simplerpc.expose_api.javascript.JsTranslateUtil import JsTranslateUtil
 from importlib import import_module
 from inspect import isclass
 from simplerpc.SimpleRpcError import SimpleRpcError
+from simplerpc.expose_api.decorators import getDecoratorsList
 
 @context_singleton
 class RPCDispatcher(SimpleRpcLogicBase):
@@ -48,35 +48,41 @@ class RPCDispatcher(SimpleRpcLogicBase):
       self.log.d('Importing module %s.%s as RPC handler.' % (modname_prefix,
                                                              package_name))
       package = import_module('%s.%s' % (modname_prefix, package_name))
-      self.__getPackageHandlers(package, getDecoratorsDict(), handlers_dict,
+      self.__getPackageHandlers(package, self.__getDecorators(), handlers_dict,
                                 constructor_kwargs)
     return handlers_dict
 
+  def __getDecorators(self):
+    decorators = getDecoratorsList()
+    dec_dict = dict()
+    for dec in decorators:
+      dec_dict[dec.__name__] = dec
+    return dec_dict
 
-  def __getPackageHandlers(self, package, method_types, handlers_dict,
+  def __getPackageHandlers(self, package, decorators, handlers_dict,
                            constructor_kwargs):
     classes = self.package_browser.getModuleAndClass(package)
     for module, class_ in classes:
       instance = class_(**constructor_kwargs)
       class_namespace = self.js_util._getJsNamespace(module)
-      for method_type in method_types:
-        if method_type not in handlers_dict:
-          handlers_dict[method_type] = {}
-        for method_name in instance.exposedMethods(method_type):
+      for dec_name, dec in decorators.items():
+        if dec_name not in handlers_dict:
+          handlers_dict[dec_name] = {}
+        for method_name in instance.exposedMethods(dec):
           cmd_str = '.'.join([class_namespace, method_name])
-          handlers_dict[method_type][cmd_str] = getattr(instance, method_name)
+          handlers_dict[dec_name][cmd_str] = getattr(instance, method_name)
     return handlers_dict
 
-  def answer(self, method_type, cmd, args, kwargs):
-    if isclass(method_type): #we got a decorator class, convert to string
-      method_type = method_type.__name__
+  def answer(self, decorator_class, cmd, args, kwargs):
+    if isclass(decorator_class): #we got a decorator class, convert to string
+      decorator_class = decorator_class.__name__
 
-    if method_type in self.__dispatch_dict \
-      and cmd in self.__dispatch_dict[method_type]:
-      method = self.__dispatch_dict[method_type][cmd]
+    if decorator_class in self.__dispatch_dict \
+      and cmd in self.__dispatch_dict[decorator_class]:
+      method = self.__dispatch_dict[decorator_class][cmd]
     else:
       raise RpcNotFoundError('Command %r of type %r not exposed or existent.'
-                             % (cmd, method_type))
+                             % (cmd, decorator_class))
 
     return_value = method(*args, **kwargs) #TODO: security review?
     return return_value
