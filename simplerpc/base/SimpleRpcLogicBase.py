@@ -7,16 +7,16 @@ from simplerpc.common.abstract.FrameworkBase import FrameworkBase
 import os
 
 class SimpleRpcLogicBase(FrameworkBase):
-  '''
-  #TODO: document
-  '''
-  def _getProjectPath(self):
-    return os.path.dirname(self.context.project_package.__file__)
+    '''
+    #TODO: document
+    '''
+    def _getProjectPath(self):
+        return os.path.dirname(self.context.project_package.__file__)
 
 def smokeTestModule():
-  from simplerpc.context.SimpleRpcContext import SimpleRpcContext
-  context = SimpleRpcContext('smoke test')
-  SimpleRpcLogicBase(context)
+    from simplerpc.context.SimpleRpcContext import SimpleRpcContext
+    context = SimpleRpcContext('smoke test')
+    SimpleRpcLogicBase(context)
 
 if __name__ == "__main__":
-  smokeTestModule()
+    smokeTestModule()

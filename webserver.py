@@ -23,39 +23,38 @@ from example_rpc.tornado_handler.JsonRpcHandler import JsonRpcHandler
 define("port", default=8002, help="run on the given port", type=int)
 
 class Application(tornado.web.Application):
-  def __init__(self):
-    handlers = [
-      (r"/", MainHandler),
-      (r"/get/.*", JsonRpcHandler),
-      (r"/requests_queue/.*", JsonRpcHandler),
-    ]
-    settings = dict(
-      template_path=os.path.join(self.getWebClientRoot(), "templates"),
-      static_path=os.path.join(self.getWebClientRoot(), "static"),
-      debug=True, #TODO: configurable
-    )
-    tornado.web.Application.__init__(self, handlers, **settings)
-    self.__generateJsRpc()
+    def __init__(self):
+        handlers = [
+          (r"/", MainHandler),
+          (r"/get/.*", JsonRpcHandler),
+          (r"/requests_queue/.*", JsonRpcHandler),
+        ]
+        settings = dict(
+          template_path=os.path.join(self.getWebClientRoot(), "templates"),
+          static_path=os.path.join(self.getWebClientRoot(), "static"),
+          debug=True, #TODO: configurable
+        )
+        tornado.web.Application.__init__(self, handlers, **settings)
+        self.__generateJsRpc()
 
-  def __generateJsRpc(self):
-    context = SimpleRpcContext('js_translator')
-    context.log('Translating Js RPC...')
-    #packages
-    import example_rpc.exposed_api.images
-    packages = [example_rpc.exposed_api.images]
-    RPCJavascriptGenerator(context).translateToFile(packages, overwrite=True)
-    context.log('Done.')
+    def __generateJsRpc(self):
+        context = SimpleRpcContext('js_translator')
+        context.log('Translating Js RPC...')
+        #packages
+        import example_rpc.exposed_api.images
+        packages = [example_rpc.exposed_api.images]
+        RPCJavascriptGenerator(context).translateToFile(packages, overwrite=True)
+        context.log('Done.')
 
-  def getWebClientRoot(self):
-    return './example_rpc/webclient'
+    def getWebClientRoot(self):
+        return './example_rpc/webclient'
 
 class MainHandler(tornado.web.RequestHandler):
-  def get(self):
-    self.render("index.html")
+    def get(self):
+        self.render("index.html")
 
 if __name__ == "__main__":
-  tornado.options.parse_command_line()
-  http_server = tornado.httpserver.HTTPServer(Application())
-  http_server.listen(options.port)
-  tornado.ioloop.IOLoop.instance().start()
-
+    tornado.options.parse_command_line()
+    http_server = tornado.httpserver.HTTPServer(Application())
+    http_server.listen(options.port)
+    tornado.ioloop.IOLoop.instance().start()

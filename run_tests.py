@@ -7,7 +7,7 @@ Copyright (c) 2013, Joaquin G. Duo
 from simplerpc.testing.smoke.SmokeTestRunner import run
 
 def runTests():
-  run()
+    run()
 
 if __name__ == "__main__":
-  runTests()
+    runTests()
