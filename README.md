@@ -1,8 +1,8 @@
 # python-simplerpc
 
-Python-simplerpc makes it really simple to publish your python webserver API as a client side javacscript API that will access the server API. You can used this library with any existing Python Web framework.
+Python-simplerpc makes it really simple to publish your python webserver API as a client side javacscript API. You can use this library with any existing Python Web framework.
 
-Suppose a class at `myserver.web_api.images.InstantMesseges.InstantMesseges` on javascript can become class at `web_api.images.InstantMesseges.InstantMesseges` with the same methods.
+Suppose a class at namespace `myserver.web_api.images.InstantMesseges.InstantMesseges` on javascript can become class at `rpc_api.images.InstantMesseges` with the same methods.
 
 You can point to a python package and python-simplerpc will generate the Javascript API to access the server.
 
@@ -132,6 +132,7 @@ The protocol format is up to the developer. (you need to specify it on the serve
 ## TODO
 
 * get rid of hard-coded parameters in javascript (hostname and port)
+* fix class namespace api to expect behavior from `myserver.web_api.images.InstantMesseges.InstantMesseges` becoming `rpc_api.images.InstantMesseges`
 
 Features Whishlist
 
