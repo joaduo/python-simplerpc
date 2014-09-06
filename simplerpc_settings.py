@@ -20,4 +20,4 @@ class Settings(SimpleRpcSettings):
     #set the node command
     node_command = 'node'
     #set the jasmine-node command
-    jasmine_node_command = 'jasmine-node'
+    jasmine_node_command = '/home/jduo/.programs/nodejs/lib/node_modules/jasmine-node/bin/jasmine-node'

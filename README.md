@@ -131,6 +131,7 @@ The protocol format is up to the developer. (you need to specify it on the serve
 
 ## TODO
 
+* document running tests and settings
 * get rid of hard-coded parameters in javascript (hostname and port)
 * fix class namespace api to expect behavior from `myserver.web_api.images.InstantMesseges.InstantMesseges` becoming `rpc_api.images.InstantMesseges`
 
