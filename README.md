@@ -59,12 +59,12 @@ from simplerpc.expose_api.decorators import expose
 
 class ImagesBrowser(ExposedBase):
     @expose.safe
-    def getImagesList(self):
+    def get_images(self):
         images = {}
         return images
 
     @expose.idempotent
-    def deleteImage(self, image_id):
+    def delete_image(self, image_id):
         #here would delete the image
         return True
 ```  
@@ -81,7 +81,7 @@ Right now all methods served through `POST` end up being queued. Later I plan su
 
 ```python
     @expose.idempotent.autosync
-    def deleteImage(self, image_id):
+    def delete_image(self, image_id):
         #here would delete the image
         return True
 ```
