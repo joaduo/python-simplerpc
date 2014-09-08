@@ -36,11 +36,6 @@ class ImagesAlbum(QueueCommandBase):
     def delete_image(self, image_id):
         #here would delete the image
         return True
-
-if __name__ == "__main__":
-    from simplerpc.testing.exposed_api.ExposedModuleAutotester import ExposedModuleAutotester
-    ExposedModuleAutotester().createJsUnitTest(overwrite=False)
-    ExposedModuleAutotester().autoTest()
 ```
 
 In Javacript the methods above would become:
@@ -78,11 +73,11 @@ Exposing with `@expose.safe` means it will be served through `GET` method and wo
 
 To translate to HTTP equivalence
 
-* expose -> POST Queued
-* expose.idempotent -> POST Queued
-* expose.safe -> GET inmediate
+* expose -> POST, Queued
+* expose.idempotent -> POST, Queued
+* expose.safe -> GET, auto-synched (immediate request)
 
-Right now all methods served through `POST` end up being queued. Later I plan support for auto-synched `POST` methods, they would be published like.
+Right now all methods served through `POST` end up being queued. Later I plan support for auto-synched `POST` methods, they would be published like, E.g.:
 
 ```python
     @expose.idempotent.autosync
@@ -95,7 +90,7 @@ Also `@expose.autosync.idempotent` will be equivalent.
 
 ### How to dispatch a request
 
-The `RPCDispatcher` class delivers the message once its received by the web server. Usage is:
+The `RPCDispatcher` class delivers the message once it is received by the web server. Initialization is:
 
 ```python
 # Create a context (later i will make contexts non-mandatory)
@@ -110,6 +105,7 @@ import myserver.web_api as exposed_api
 # in javascript. (this is not optimal, i need to change it) 
 dispatcher = RPCDispatcher(context, packages={exposed_api:['images']})
 ```
+
 Once the dispatcher is initialized you can serve a request like:
 
 ```python
@@ -128,6 +124,73 @@ For an specific example you can check [Tornado dispatcher file](example_rpc/torn
 The client side of the RPC protocol can be seen at [RPCCommandsQueue.js](example_rpc/webclient/static/js/simplerpc/rpc/RPCCommandsQueue.js) at the `push` (queuing) and `sync` (sending and receiving) method. 
 
 The protocol format is up to the developer. (you need to specify it on the server and client side)
+
+## Testing a controller's module
+
+Based on the first example the whole module would look like:
+
+```python
+from simplerpc.expose_api.base.QueueCommandBase import QueueCommandBase
+
+class ImagesAlbum(QueueCommandBase):
+    def get_images(self):
+    	#return a dictionary with the details of the images
+        images = {}
+        for img_id in range(20):
+            images[img_id] = dict(name='Image%03d' % img_id,
+                                  desc='Image %s made by John Doe' % img_id,
+                                  url='static/images/Image%03d.jpg' % img_id)
+        return images
+
+    def delete_image(self, image_id):
+        #here would delete the image
+        return True
+
+#Generate and run tests
+if __name__ == "__main__":
+    from simplerpc.testing.exposed_api.ExposedModuleAutotester import ExposedModuleAutotester
+    auto = ExposedModuleAutotester()
+    #Generate tests mock in javascript
+    auto.createJsUnitTest(overwrite=False)
+    #Run python and javascript tests (in nodejs the later) 
+    auto.autoTest()
+```
+
+The `ExposedModuleAutotester.createJsUnitTest` will generate a test mock for each method in the controller. The following example is generated based on a jasmine-node template.
+
+```javascript
+describe('images/ImagesBrowser', function(){
+  //Context and method solver
+  var context = require('context').getContext('testing');
+  var auto_sync = true;
+  var exposed_rpc_api = require('example_rpc/ExposedRpcApi.js')(context, auto_sync);
+  var methods = exposed_rpc_api.requireApi('images/ImagesBrowser');
+   
+ 
+  //Test get_images
+  describe('#get_images()', function(){
+    it('should ...', function(done){
+      //Test the method
+      var callback = function(return_value){ 
+        //Do your checking here
+        done();
+      };
+      //In case of connection error calls this
+      var error_callback = function(data){ 
+      };
+      //Call the tested method through RPC
+      methods.get_images( callback, error_callback);
+    })
+  })
+
+  //same thing for delete_image here ...
+  
+})
+```
+
+Right now the code for generating mocks for python is not there, although the unit test module for this controller can be seen in [ImagesBrowser.py unit test](example_rpc/tests/twin_unittests/exposed_api/images/ImagesBrowser.py).
+
+So when the code reaches `auto.autoTest()` it will run python's and javscript's unit tests and show output results.
 
 ## TODO
 
