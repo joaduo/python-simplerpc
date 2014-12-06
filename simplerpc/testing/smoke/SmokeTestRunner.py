@@ -10,7 +10,6 @@ from unittest.case import TestCase
 from unittest.runner import TextTestRunner
 from unittest.suite import TestSuite
 from types import FunctionType
-from simplerpc.common.path import formatPathPrint
 
 
 class SmokeTestRunner(SimpleRpcLogicBase):
@@ -70,6 +69,7 @@ class SmokeTestRunner(SimpleRpcLogicBase):
         TextTestRunner().run(big_suite)
 
 def run():
+    from simplerpc.common.path import formatPathPrint
     from simplerpc.context.SimpleRpcContext import SimpleRpcContext
     from simplerpc.common.log.Logger import Logger
     import simplerpc.common.log.printSmoke as printSmoke

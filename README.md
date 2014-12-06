@@ -23,7 +23,7 @@ If you publish a class that manages an Images Album it would look like:
 ```python
 from simplerpc.expose_api.base.QueueCommandBase import QueueCommandBase
 
-class ImagesAlbum(QueueCommandBase):
+class ImagesBrowser(QueueCommandBase):
     def get_images(self):
     	#return a dictionary with the details of the images
         images = {}
